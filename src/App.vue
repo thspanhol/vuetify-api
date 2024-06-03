@@ -7,11 +7,11 @@
 </template>
 
 <script>
-import FetchData from './components/FetchData.vue';
+import FetchData from "./components/FetchData.vue";
 
 export default {
   components: {
-    FetchData
-  }
+    FetchData,
+  },
 };
 </script>

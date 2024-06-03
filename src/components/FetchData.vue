@@ -2,22 +2,34 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1>Dados das Capitais</h1>
+        <h1>Descubra a temperatura atual da sua cidade!</h1>
         <v-text-field
           v-model="newCity"
-          label="Digite o nome de uma cidade"
+          label="Insira o nome da sua cidade"
           @keyup.enter="addCity"
         ></v-text-field>
-        <v-list>
-          <v-list-item v-for="(data, index) in responses" :key="index">
-            <v-list-item-content>
-              <v-list-item-title>Capital: {{ data.city }}</v-list-item-title>
-              <v-list-item-subtitle
-                >Temperatura: {{ data.temperature }}°C</v-list-item-subtitle
+        <v-row>
+          <v-col
+            v-for="(data, index) in responses"
+            :key="index"
+            cols="12"
+            sm="6"
+            md="4"
+          >
+            <v-card>
+              <v-img
+                :src="getWeatherImage(data.weather)"
+                height="200px"
+                class="white--text align-end"
               >
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
+                <v-card-title>{{
+                  data.city.charAt(0).toUpperCase() + data.city.slice(1)
+                }}</v-card-title>
+              </v-img>
+              <v-card-text>Temperatura: {{ data.temperature }}°C</v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -58,7 +70,13 @@ export default {
         "Aracaju",
         "Palmas",
       ],
-      initialCapitals: ["Rio Branco", "Maceió", "Macapá", "Manaus", "Salvador"],
+      initialCapitals: [
+        "Caruaru",
+        "Porto Alegre",
+        "São Paulo",
+        "Rio de Janeiro",
+        "Brasília",
+      ],
       responses: [],
       newCity: "",
     };
@@ -68,12 +86,13 @@ export default {
   },
   methods: {
     async fetchInitialData() {
-      const apiKey = "fd9ef5cbc248c2089645da454394cb7f"; // Substitua pela sua chave de API
+      const apiKey = "fd9ef5cbc248c2089645da454394cb7f";
       const promises = this.initialCapitals.map((city) => {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
         return axios.get(url).then((response) => ({
           city,
           temperature: response.data.main.temp,
+          weather: response.data.weather[0],
         }));
       });
 
@@ -100,12 +119,31 @@ export default {
           this.responses.push({
             city: this.newCity,
             temperature: response.data.main.temp,
+            weather: response.data.weather[0],
           });
           this.newCity = "";
         } catch (error) {
           console.error("Erro ao adicionar cidade:", error);
         }
       }
+    },
+    getWeatherImage(weather) {
+      const weatherImages = {
+        Thunderstorm:
+          "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-lightning-cloud-storm-3859137_121212.png",
+        Drizzle:
+          "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-heavy-rain-cloud-climate-3859135_121235.png",
+        Rain: "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-heavy-rain-cloud-climate-3859135_121235.png",
+        Snow: "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-flake-flakes-snowflake-3859134_121231.png",
+        Clear:
+          "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-hot-sun-day-3859136_121222.png",
+        Clouds:
+          "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-cloudy-season-cloud-3859132_121213.png",
+      };
+      return (
+        weatherImages[weather.main] ||
+        "https://cdn.icon-icons.com/icons2/1903/PNG/512/iconfinder-weather-weather-forecast-cloudy-season-cloud-3859132_121213.png"
+      );
     },
   },
 };
